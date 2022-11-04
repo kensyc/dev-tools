@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+source $XDG_CONFIG_HOME/dockerenv/wrapper
+
+function main() {
+    # @todo: do in advance via generator
+    maven_root=$(fd "pom.xml" $PROJECT_FOLDER)
+
+    docker run --rm \
+        -u "$(id -u):$(id -g)" \
+        -e MAVEN_CONFIG=/var/maven/.m2 \
+        -v $maven_root:/usr/src/mymaven \
+        -v m2:/var/maven/.m2 \
+        -w /usr/src/mymaven \
+        maven:latest mvn -Duser.home=/var/maven "$@"
+}
+
+wrapper main "$@"
+

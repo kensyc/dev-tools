@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+source $XDG_CONFIG_HOME/dockerenv/wrapper
+
+# @todo: node should be backwards compatible, if something fails because of the version
+# add checks for node requirements (i.e. if engines is defined)
+# @todo: create env var for folder containing package.json (so $(pwd) isn't needed)
+
+function main() {
+    docker run --rm \
+        -v npmcache:/home/node/.npm \
+        -v sshconfig:/home/node/.ssh:ro \
+        -v "$(pwd)":/nodeapp \
+        -e C_UID=$(id -u) \
+        -e C_GID=$(id -g) \
+        dockerwest/nodejs:16 \
+        npm \
+        "$@"
+}
+
+wrapper main "$@"

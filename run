@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+source $XDG_CONFIG_HOME/dockerenv/wrapper
+
+function main() {
+    docker_compose "$@"
+}
+
+wrapper main "$@"

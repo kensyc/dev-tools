@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+source $XDG_CONFIG_HOME/dockerenv/mysqlwrapper
+
+function main() {
+    if [[ -z $MYSQL_SERVICE ]]; then
+        error "Could not find MYSQL service."
+
+        exit 1
+    fi
+
+    if ! is_running $MYSQL_SERVICE; then
+        # @todo fix this issue, import goes fine if the service is already running
+        # but fails if we try to start it in our script and try to import
+        # waiting long enough (i.e. with sleep) does not fix the issue
+        error "mysql service needs to be manually started before importing"
+
+        exit 1
+        # start_service $MYSQL_SERVICE
+        # traps+=("stop_service ${MYSQL_SERVICE}")
+        #
+        # until ping_mysql; do
+        #     sleep 1
+        # done
+    fi
+
+    exec_service -T $MYSQL_SERVICE mysql $(credentials) "$@"
+}
+
+wrapper main "$@"

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+source $XDG_CONFIG_HOME/dockerenv/wrapper
+
+function main() {
+    docker run --rm \
+        -v yarncache:/home/node/.cache/yarn \
+        -v yarnconf:/home/node/.config/yarn \
+        -v sshconfig:/home/node/.ssh:ro \
+        -v "$(pwd)":/nodeapp \
+        -e C_UID=$(id -u) \
+        -e C_GID=$(id -g) \
+        dockerwest/nodejs:16 \
+        yarn \
+        "$@"
+}

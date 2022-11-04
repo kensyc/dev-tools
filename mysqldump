@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+source $XDG_CONFIG_HOME/dockerenv/mysqlwrapper
+
+function main() {
+    main_parent
+    
+    output=$(exec_service $MYSQL_SERVICE mysqldump $(credentials) "$@")
+    
+    if [[ $? -ne 0 ]]; then
+        echo "$output" 1>&2
+    
+        exit 1
+    fi
+    
+    echo "$output"
+}
+
+wrapper main "$@"

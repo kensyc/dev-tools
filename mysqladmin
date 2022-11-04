@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+source $XDG_CONFIG_HOME/dockerenv/mysqlwrapper
+
+function main() {
+    main_parent
+
+    exec_service $MYSQL_SERVICE mysqladmin $(credentials) "$@"
+}
+
+wrapper main "$@"

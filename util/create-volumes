@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+ docker volume create --driver local \
+    --opt type=none \
+    --opt device=$HOME/.local/share/composer \
+    --opt o=bind \
+    composer-auth
+
+ docker volume create --driver local \
+    --opt type=none \
+    --opt device=$HOME/.cache/composer \
+    --opt o=bind \
+    composer-cache
+
+ docker volume create --driver local \
+    --opt type=none \
+    --opt device=$HOME/.cache/npm \
+    --opt o=bind \
+    npm-cache
+
+ docker volume create --driver local \
+    --opt type=none \
+    --opt device=$HOME/.cache/yarn \
+    --opt o=bind \
+    yarn-cache
+
+ docker volume create --driver local \
+    --opt type=none \
+    --opt device=$HOME/.config/yarn \
+    --opt o=bind \
+    yarn-conf
+
+docker volume create --driver local \
+    --opt type=none \
+    --opt device=$HOME/.ssh \
+    --opt o=bind \
+    ssh-config
+
+docker volume create --driver local \
+    --opt type=none \
+    --opt device=$XDG_DATA_HOME/m2 \
+    --opt o=bind \
+    m2

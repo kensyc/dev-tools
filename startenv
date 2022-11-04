@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+set -e
+
+usage() {
+cat <<- EOF
+Start a tmux session with application specific environment variables and binaries
+Usage:
+    startenv <rootfolder project>
+Options:
+    -r, --regenerate    Regenerate cached env variables
+    -f, --folder        Folder which contains the project
+    -d, --defaults      Source a file with defaults
+    -h, --help          Show this message
+    -v, --verbose       Show more info when executing commands
+EOF
+}
+
+regenerate=0
+project=""
+defaults=""
+verbose=0
+folder="$HOME/projects"
+cachedir=${DOCKERENV:-"$XDG_CACHE_HOME/docker-environments"}
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -r | --regenerate )
+            regenerate=1
+            ;;
+        -f | --folder )
+            shift
+            folder=$1
+            ;;
+        -d | --defaults )
+            shift
+            defaults=$1
+            ;;
+        -h | --help )
+            usage
+            exit
+            ;;
+        -v | --verbose )
+            verbose=1
+            ;;
+        * )
+            if [[ -n "$project" ]]; then
+                echo "Too many arguments"
+                exit 1
+            fi
+            project=$1
+            ;;
+    esac
+    shift
+done
+
+if [[ -z $project ]]; then
+    echo "no projectfolder specified"
+    exit 1
+fi
+
+if [[ ! -z $defaults ]]; then
+    source $defaults $project $folder
+fi
+
+if [[ ! -e $cachedir/$project || $regenerate -eq 1 ]]; then
+    $XDG_CONFIG_HOME/dockerenv/generator/generate.py $folder/$project 
+fi
+
+[[ $verbose -eq 1 ]] && env=" -e DOCKERENV_VERBOSE=1" || env=" -e DOCKERENV_VERBOSE=0"
+while read e; do
+    env="$env -e $e"
+done <$cachedir/$project
+
+PROJECT_FOLDER=$(awk -F'=' '/PROJECT_FOLDER/ { print $2 }' $cachedir/$project)
+COMPOSE_PROJECT_NAME=$(awk -F'=' '/COMPOSE_PROJECT_NAME/ { print $2 }' $cachedir/$project)
+
+export PATH="$XDG_CONFIG_HOME/dockerenv:$PATH"
+
+cd $PROJECT_FOLDER
+
+tmux new-session$env -A -s $COMPOSE_PROJECT_NAME

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+source $XDG_CONFIG_HOME/dockerenv/wrapper
+
+function main() {
+    if [[ -z $PHP_SERVICE ]]; then
+        echo "Could not find PHP service."
+
+        exit 1
+    fi
+
+    run_service \
+        -v composer-auth:/var/www/.composer:ro \
+        -v composer-cache:/var/www/.cache/composer \
+        -v ssh-config:/var/www/.ssh:ro \
+        -e COMPOSER_MEMORY_LIMIT=-1 \
+        $PHP_SERVICE \
+        composer \
+        "$@"
+}
+
+wrapper main "$@"
