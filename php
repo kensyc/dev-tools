@@ -9,7 +9,11 @@ function main() {
         exit 1
     fi
 
-    exec_service -u=$(id -u) $PHP_SERVICE php "$@"
+    exec_service \
+        -u="$(id -u):$(id -g)" \
+        $PHP_SERVICE \
+        php \
+        "$@"
     # exec_service $PHP_SERVICE gosu www-data php "$@"
 }
 
