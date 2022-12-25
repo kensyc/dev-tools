@@ -8,12 +8,13 @@ source $XDG_CONFIG_HOME/dockerenv/wrapper
 
 function main() {
     docker run --rm \
-        -v npmcache:/home/node/.npm \
-        -v sshconfig:/home/node/.ssh:ro \
-        -v "$(pwd)":/nodeapp \
-        -e C_UID=$(id -u) \
-        -e C_GID=$(id -g) \
-        dockerwest/nodejs:16 \
+        -v npm-cache:/home/node/.npm \
+        -v ssh-config:/home/node/.ssh:ro \
+        -v "$(pwd)":/home/node/app \
+        -u "$(id -u):$(id -g)" \
+        -w "/home/node/app" \
+        -e "TERM=${TERM}" \
+        node:19-alpine \
         npm \
         "$@"
 }
