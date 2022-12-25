@@ -9,12 +9,16 @@ function main() {
         exit 1
     fi
 
+    # When having permission issues, especially when using older services,
+    # try these environment variables
+    # -e C_UID=1000
+    # -e G_UID=1000
     run_service \
         -v composer-auth:/var/www/.composer:ro \
         -v composer-cache:/var/www/.cache/composer \
         -v ssh-config:/var/www/.ssh:ro \
         -e COMPOSER_MEMORY_LIMIT=-1 \
-        -u="$(id -u):$(id -g)" \
+        -u "$(id -u):$(id -g)" \
         $PHP_SERVICE \
         composer \
         "$@"

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "todo"
+exit 1
