@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source $XDG_CONFIG_HOME/dockerenv/wrapper
+source wrapper
 
 function main() {
     if [[ -z $PHP_SERVICE ]]; then
@@ -14,7 +14,6 @@ function main() {
         $PHP_SERVICE \
         php \
         "$@"
-    # exec_service $PHP_SERVICE gosu www-data php "$@"
 }
 
 wrapper main "$@"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source $XDG_CONFIG_HOME/dockerenv/wrapper
+source wrapper
 
 function ping_mysql() {
     docker_compose exec "$MYSQL_SERVICE" mysqladmin ping > /dev/null 2>&1

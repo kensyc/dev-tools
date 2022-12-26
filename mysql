@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source $XDG_CONFIG_HOME/dockerenv/mysqlwrapper
+source mysqlwrapper
 
 function main() {
     main_parent

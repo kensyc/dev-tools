@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source $XDG_CONFIG_HOME/dockerenv/wrapper
+source wrapper
 
 function main() {
     docker run --rm \

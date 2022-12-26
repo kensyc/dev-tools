@@ -6,22 +6,26 @@ usage() {
 cat <<- EOF
 Start a tmux session with application specific environment variables and binaries
 Usage:
-    startenv <rootfolder project>
+    startenv [-d|--defaults] [-f|--folder] [-h|--help]
+             [-r|--regenerate ] [-v|--verbose]
+             <name>
 Options:
-    -r, --regenerate    Regenerate cached env variables
-    -f, --folder        Folder which contains the project
     -d, --defaults      Source a file with defaults
+    -f, --folder        Project folder
     -h, --help          Show this message
+    -r, --regenerate    Regenerate cached env variables
     -v, --verbose       Show more info when executing commands
 EOF
 }
 
 regenerate=0
-project=""
+folder=""
 defaults=""
+name=""
 verbose=0
-folder="$HOME/projects"
-cachedir=${DOCKERENV:-"$XDG_CACHE_HOME/docker-environments"}
+root_dir=${DEV_TOOLS_PROJECTS_DIR:-"$HOME/projects"}
+cache_dir=${DEV_TOOLS_CACHE_DIR:-$XDG_CACHE_HOME/dev-tools}
+dev_tools_dir=$(dirname $(readlink -f $(which $0)))
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -44,38 +48,42 @@ while [ "$1" != "" ]; do
             verbose=1
             ;;
         * )
-            if [[ -n "$project" ]]; then
+            if [[ -n "$name" ]]; then
                 echo "Too many arguments"
                 exit 1
             fi
-            project=$1
+            name=$1
             ;;
     esac
     shift
 done
 
-if [[ -z $project ]]; then
-    echo "no projectfolder specified"
+if [[ -z $name ]]; then
+    echo "no project specified"
     exit 1
 fi
 
+if [[ -z $folder ]]; then
+    folder=$root_dir/$name
+fi
+
 if [[ ! -z $defaults ]]; then
-    source $defaults $project $folder
+    source $defaults $folder
 fi
 
-if [[ ! -e $cachedir/$project || $regenerate -eq 1 ]]; then
-    $XDG_CONFIG_HOME/dockerenv/generator/generate.py $folder/$project 
+if [[ ! -e $cache_dir/$name || $regenerate -eq 1 ]]; then
+    $dev_tools_dir/generator/generate.py $folder $name
 fi
 
-[[ $verbose -eq 1 ]] && env=" -e DOCKERENV_VERBOSE=1" || env=" -e DOCKERENV_VERBOSE=0"
+[[ $verbose -eq 1 ]] && env=" -e DEV_TOOLS_VERBOSE=1" || env=" -e DEV_TOOLS_VERBOSE=0"
 while read e; do
     env="$env -e $e"
-done <$cachedir/$project
+done <$cache_dir/$name
 
-PROJECT_FOLDER=$(awk -F'=' '/PROJECT_FOLDER/ { print $2 }' $cachedir/$project)
-COMPOSE_PROJECT_NAME=$(awk -F'=' '/COMPOSE_PROJECT_NAME/ { print $2 }' $cachedir/$project)
+PROJECT_FOLDER=$(awk -F'=' '/PROJECT_FOLDER/ { print $2 }' $cache_dir/$name)
+COMPOSE_PROJECT_NAME=$(awk -F'=' '/COMPOSE_PROJECT_NAME/ { print $2 }' $cache_dir/$name)
 
-export PATH="$XDG_CONFIG_HOME/dockerenv:$PATH"
+export PATH="$dev_tools_dir:$PATH"
 
 cd $PROJECT_FOLDER
 
