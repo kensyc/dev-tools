@@ -3,7 +3,10 @@
 source wrapper
 
 function main() {
-    docker_compose "$@"
+    exec_service \
+        freqtrade \
+        freqtrade \
+        "$@"
 }
 
 wrapper main "$@"

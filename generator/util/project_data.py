@@ -3,110 +3,100 @@ import os
 from typing import Generator, Optional
 
 import docker
-from docker.models.containers import ContainerCollection
 import yaml
+from docker.models.containers import ContainerCollection
+
 
 class ProjectData:
-    # dont search for docker-compose files in these directories
-    # compose_file_excludes = ['/vendor/', '/.target/']
+    cached_compose_file = ""
 
-
-    def __init__(self, project_folder: str) -> None:
+    def __init__(self, project_folder: str, name: str) -> None:
         self.project_folder = os.path.expanduser(project_folder)
+        self.name = name
         self.client = docker.from_env()
         self.containers = self._get_containers()
 
-
     @property
     def project_name(self):
-        '''
-            Difference between just project and project name:
-
-            project is the folder name, project name is the name used in docker
-        '''
-        return os.getenv('COMPOSE_PROJECT_NAME', os.path.basename(self.project_folder))
-
+        return os.getenv("COMPOSE_PROJECT_NAME", self.name)
 
     @property
     def startup_folder(self):
-        return os.path.expanduser(os.getenv('PROJECT_FOLDER', self.project_folder))
-
+        return os.path.expanduser(
+            os.getenv("PROJECT_FOLDER", self.project_folder)
+        )
 
     @property
     def compose_file(self):
-        return self.get_compose_file()
+        if not self.cached_compose_file:
+            self.cached_compose_file = self.get_compose_file()
 
+        return self.cached_compose_file
 
     def get_containers(self) -> Optional[ContainerCollection]:
         return self.containers
 
-
     def _get_containers(self) -> Optional[ContainerCollection]:
-        filters = {'label': 'com.docker.compose.project=' + self.project_name}
+        filters = {"label": "com.docker.compose.project=" + self.project_name}
         containers = self.client.containers.list(all=True, filters=filters)
-    
+
         if containers:
             return containers  # pyright: ignore
-    
-        return None
 
+        return None
 
     def gitignore(self, file: str) -> Generator:
         for line in file:
-            if line and '#' not in line:
+            if line and "#" not in line:
                 yield line
 
-
     def get_compose_file(self) -> str:
-        compose_file = os.getenv('COMPOSE_FILE')
+        compose_file = os.getenv("COMPOSE_FILE")
 
         if compose_file:
             return compose_file
 
         compose_file = glob.glob(
-            self.project_folder + '/**/docker-compose.yml',
-            recursive=True
+            self.project_folder + "/**/docker-compose*", recursive=True
         )
 
         gitignores = glob.glob(
-            self.project_folder + '/**/.gitignore',
-            recursive=True
+            self.project_folder + "/**/.gitignore", recursive=True
         )
 
         # @todo: alternatively just use fd
         ignored_files = []
         for gitignore in gitignores:
-            with open(gitignore,'r') as f:
+            with open(gitignore, "r") as f:
                 for line in f:
                     line = line.strip()
-                    if line and line != 'docker-compose.yml' and '#' not in line:
+                    if line and line != "docker-compose" and "#" not in line:
                         ignored_files.append(line)
 
         compose_file = list(
             filter(
                 lambda file: not any(
-                    exclude in file
-                    for exclude in ignored_files
+                    exclude in file for exclude in ignored_files
                 ),
-                compose_file
+                compose_file,
             )
         )
 
         match compose_file:
             case 0:
-                print("No docker-compose.yaml file found in project")
+                print("No docker-compose.yml file found in project")
                 exit(1)
             case 1:
                 compose_file = compose_file[0]
             case _:
-                print("Select a compose file:\n")
+                print("Select a compose file:")
                 for index in range(0, len(compose_file)):
-                    print(f"[{index}] {compose_file[index]}\n")
+                    print(f"[{index}] {compose_file[index]}")
 
-                compose_file = compose_file[int(input("Selection:"))]
+                print("")
+                compose_file = compose_file[int(input("Selection: "))]
 
         return compose_file
 
-
     def get_compose_services(self) -> dict:
-        return yaml.load(open(self.get_compose_file(), 'r'), yaml.Loader)
+        return yaml.load(open(self.compose_file, "r"), yaml.Loader)

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source $XDG_CONFIG_HOME/dockerenv/wrapper
+source wrapper
 
 # @todo: node should be backwards compatible, if something fails because of the version
 # add checks for node requirements (i.e. if engines is defined)

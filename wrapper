@@ -74,7 +74,7 @@ function exec_service() {
 
 function traps() {
     for ((i = 0; i < ${#traps[@]}; i++)); do
-        if [[ ${DOCKERENV_VERBOSE} -eq 1 ]]; then
+        if [[ ${DEV_TOOLS_VERBOSE} -eq 1 ]]; then
             ${traps[$i]} 3>&2
         else
             ${traps[$i]}
@@ -94,7 +94,7 @@ function wrapper() {
     # cleanup
     trap traps EXIT
 
-    if [[ ${DOCKERENV_VERBOSE} -eq 1 ]]; then
+    if [[ ${DEV_TOOLS_VERBOSE} -eq 1 ]]; then
         # use stderr to show logs
         $main "$@" 3>&2
 
