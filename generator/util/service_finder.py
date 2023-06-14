@@ -6,7 +6,7 @@ class ServiceFinder:
     def __init__(self, query: list[str]) -> None:
         self.query = query
         self.container = None
-        
+
 
     def _in_container_command(
         self,
@@ -58,7 +58,7 @@ class ServiceFinder:
             if self._in_container_image(container):
                 self.container = container
                 return container
-    
+
         return None
 
 
@@ -70,7 +70,7 @@ class ServiceFinder:
             for service_name, service in compose_yaml["services"].items():
                 if psub in service_name:
                     return service_name
-    
+
         for psub in self.query:
             for service_name, service in compose_yaml["services"].items():
                 if psub in service.get("image", ""):

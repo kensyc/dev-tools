@@ -11,7 +11,7 @@ function main() {
 
     exec_service \
         -u="$(id -u):$(id -g)" \
-        $PHP_SERVICE \
+        "$PHP_SERVICE" \
         php \
         "$@"
 }

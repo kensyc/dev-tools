@@ -10,7 +10,7 @@ function main() {
         -v "$(pwd)":/home/node/app \
         -u "$(id -u):$(id -g)" \
         -w "/home/node/app" \
-        node:19-alpine \
+        "$NODE_SERVICE" \
         yarn \
         "$@"
 }

@@ -82,7 +82,7 @@ class ProjectData:
             )
         )
 
-        match compose_file:
+        match len(compose_file):
             case 0:
                 print("No docker-compose.yml file found in project")
                 exit(1)

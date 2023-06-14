@@ -14,7 +14,7 @@ function main() {
         -u "$(id -u):$(id -g)" \
         -w "/home/node/app" \
         -e "TERM=${TERM}" \
-        node:19-alpine \
+        "$NODE_SERVICE" \
         npm \
         "$@"
 }

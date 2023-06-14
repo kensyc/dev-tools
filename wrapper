@@ -12,8 +12,8 @@ function error() {
 
 function docker_compose() {
     docker compose \
-        -f $COMPOSE_FILE \
-        -p $COMPOSE_PROJECT_NAME \
+        -f "$COMPOSE_FILE" \
+        -p "$COMPOSE_PROJECT_NAME" \
         "$@"
 }
 
@@ -35,11 +35,11 @@ function stop_service() {
 }
 
 function is_running() {
-    docker_compose ps $1 2>&3 | grep "running" > /dev/null
+    docker_compose ps "$1" 2>&3 | grep "Up" > /dev/null
 }
 
 function exists() {
-    docker_compose ps $1 > /dev/null 2>&3
+    docker_compose ps "$1" > /dev/null 2>&3
 }
 
 function exec_service() {
@@ -52,14 +52,21 @@ function exec_service() {
         fi
     done
 
-    if is_running $service; then
-        docker_compose exec "$@"
+    args=("$@")
+
+    # dont attach a pseudo TTY if we're not in a terminal (e.g. when we're in a script)
+    if [ ! -t 0 ]; then
+        args=("-T" "${args[@]}")
+    fi
+
+    if is_running "$service"; then
+        docker_compose exec "${args[@]}"
 
         return;
     fi
 
-    if exists $service; then
-        run_service "$@"
+    if exists "$service"; then
+        run_service "${args[@]}"
 
         return;
     fi
@@ -68,7 +75,7 @@ function exec_service() {
     message "Starting up environment"
 
     docker_compose up -d 1>&3 2>&3
-    docker_compose exec "$@"
+    docker_compose exec "${args[@]}"
     docker_compose stop 1>&3 2>&3
 }
 

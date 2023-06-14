@@ -2,7 +2,7 @@
 
 project="${1/#\~/$HOME}"
 
-dockerdirs=("docker" "infrastructure")
+dockerdirs=("docker" "infrastructure" "infra")
 for dir in $project/*; do
     for dockerdir in ${dockerdirs[@]}; do
         [ -d "$dir" ] || continue
