@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
 
+if [ ! -d $HOME/.local/share/composer ]; then
+    mkdir -p $HOME/.local/share/composer
+fi
+
  docker volume create --driver local \
     --opt type=none \
     --opt device=$HOME/.local/share/composer \
     --opt o=bind \
     composer-auth
+
+if [ ! -d $HOME/.cache/composer ]; then
+    mkdir -p $HOME/.cache/composer
+fi
 
  docker volume create --driver local \
     --opt type=none \
@@ -12,11 +20,19 @@
     --opt o=bind \
     composer-cache
 
+if [ ! -d $HOME/.cache/npm ]; then
+    mkdir -p $HOME/.cache/npm
+fi
+
  docker volume create --driver local \
     --opt type=none \
     --opt device=$HOME/.cache/npm \
     --opt o=bind \
     npm-cache
+
+if [ ! -d $HOME/.cache/yarn ]; then
+    mkdir -p $HOME/.cache/yarn
+fi
 
  docker volume create --driver local \
     --opt type=none \
@@ -24,17 +40,29 @@
     --opt o=bind \
     yarn-cache
 
+if [ ! -d $HOME/.config/yarn ]; then
+    mkdir -p $HOME/.config/yarn
+fi
+
  docker volume create --driver local \
     --opt type=none \
     --opt device=$HOME/.config/yarn \
     --opt o=bind \
     yarn-conf
 
+if [ ! -d $HOME/.ssh ]; then
+    mkdir -p $HOME/.ssh
+fi
+
 docker volume create --driver local \
     --opt type=none \
     --opt device=$HOME/.ssh \
     --opt o=bind \
     ssh-config
+
+if [ ! -d $XDG_DATA_HOME/m2 ]; then
+    mkdir -p $XDG_DATA_HOME/m2
+fi
 
 docker volume create --driver local \
     --opt type=none \
