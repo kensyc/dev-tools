@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+source mysqlwrapper
+
+function main() {
+    main_parent
+
+    exec_service $MYSQL_SERVICE mysql $(credentials) -e "CREATE DATABASE $1 DEFAULT CHARSET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci"
+}
+
+wrapper main "$@"

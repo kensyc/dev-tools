@@ -9,7 +9,7 @@ class Php:
 
         self.serviceName = serviceFinder.find_service(
             project_data.get_containers(),
-            project_data.get_compose_services()
+            project_data.compose_yaml
         )
 
     def __str__(self) -> str:

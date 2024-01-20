@@ -1,0 +1,1 @@
+# ssh ... mysql -u -p db SHOW VARIABLES LIKE '%version%';

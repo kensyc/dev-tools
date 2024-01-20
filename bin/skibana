@@ -3,7 +3,7 @@
 set -e
 
 if [[ -z $1 ]]; then
-    echo "Usage: kibana user@hostname"
+    echo "Usage: skibana user@hostname"
 fi
 
 port=9200
@@ -16,6 +16,10 @@ ssh -4 -o ExitOnForwardFailure=yes -f -L $port:localhost:9200 $1 sleep 30
 version=$(curl -s \
     -XGET "localhost:$port?filter_path=version.number&pretty=false" | \
     awk -F'"' {'print $6'})
+
+echo $version
+
+exit 0
 
 docker run --rm -it \
     --net host \

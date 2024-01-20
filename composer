@@ -18,10 +18,10 @@ function main() {
         -v composer-cache:/var/www/.cache/composer \
         -v ssh-config:/var/www/.ssh:ro \
         -e COMPOSER_MEMORY_LIMIT=-1 \
-        -u "$(id -u):$(id -g)" \
         $PHP_SERVICE \
         composer \
         "$@"
+        # -u "$(id -u):$(id -g)" \
 }
 
 wrapper main "$@"

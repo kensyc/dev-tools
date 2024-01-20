@@ -25,7 +25,7 @@ name=""
 verbose=0
 root_dir=${DEV_TOOLS_PROJECTS_DIR:-"$HOME/projects"}
 cache_dir=${DEV_TOOLS_CACHE_DIR:-$XDG_CACHE_HOME/dev-tools}
-dev_tools_dir=$(dirname $(readlink -f $(which $0)))
+dev_tools_dir="$(dirname $(readlink -f $(which $0)))/.."
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -67,7 +67,7 @@ if [[ -z $folder ]]; then
     folder=$root_dir/$name
 fi
 
-if [[ ! -z $defaults ]]; then
+if [[ -n $defaults ]]; then
     source $defaults $folder
 fi
 

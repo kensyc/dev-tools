@@ -3,6 +3,7 @@
 import os
 import sys
 
+from mssql import Mssql
 from mysql import Mysql
 from php import Php
 from util.project_data import ProjectData
@@ -20,7 +21,12 @@ cachedir = os.getenv(
     "DEV_TOOLS_CACHE_DIR", os.path.expanduser("~/.cache/dev-tools/")
 )
 
-services = {"PHP": Php(project_data), "MYSQL": Mysql(project_data)}
+
+services = {
+    "PHP": Php(project_data),
+    "MSSQL": Mssql(project_data),
+    "MYSQL": Mysql(project_data),
+}
 
 for tool, service in services.items():
     add_to_output(tool + "_SERVICE", service)
@@ -29,6 +35,9 @@ for tool, service in services.items():
 add_to_output("COMPOSE_PROJECT_NAME", project_data.project_name)
 add_to_output("COMPOSE_FILE", project_data.compose_file)
 add_to_output("PROJECT_FOLDER", project_data.project_folder)
+
+# MSSQL
+add_to_output("MSSQL_SA_PASSWORD", services["MSSQL"].sa_password())
 
 # MYSQL
 add_to_output("MYSQL_DATABASE", services["MYSQL"].database())

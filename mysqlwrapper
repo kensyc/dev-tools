@@ -3,30 +3,43 @@
 source wrapper
 
 function ping_mysql() {
-    docker_compose exec "$MYSQL_SERVICE" mysqladmin ping > /dev/null 2>&1
+	docker_compose exec "$MYSQL_SERVICE" mysqladmin ping >/dev/null 2>&1
 }
 
 function main_parent() {
-    if [[ -z $MYSQL_SERVICE ]]; then
-        error "Could not find MYSQL service."
+	if [[ -z $MYSQL_SERVICE ]]; then
+		error "Could not find MYSQL service."
 
-        exit 1
-    fi
+		exit 1
+	fi
 
-    # mysql commands do not perform well when container isn't running
-    if ! is_running "$MYSQL_SERVICE"; then
-        start_service "$MYSQL_SERVICE"
-        traps+=("stop_service ${MYSQL_SERVICE}")
+	# mysql commands do not perform well when container isn't running
+	if ! is_running "$MYSQL_SERVICE"; then
+		start_service "$MYSQL_SERVICE"
+		traps+=("stop_service ${MYSQL_SERVICE}")
 
-        until ping_mysql; do
-            sleep 1
-        done
-    fi
+		until ping_mysql; do
+			sleep 1
+		done
+	fi
 }
 
 function credentials() {
-    [[ -n ${MYSQL_USER} ]] && user=${MYSQL_USER} || user=root
-    [[ $user = "root" ]] && pass=${MYSQL_ROOT_PASSWORD} || pass=${MYSQL_PASSWORD}
+    if [[ -n ${MYSQL_USER} ]]; then
+        user=${MYSQL_USER}
+    else
+        user=root
+    fi
+
+    if [[ $user = "root" ]]; then
+        pass=${MYSQL_ROOT_PASSWORD}
+    else
+        pass=${MYSQL_PASSWORD}
+    fi
+
+    if [[ -z $pass ]]; then
+        pass=toor
+    fi
 
     echo "-u${user} -p${pass}"
 }

@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+usage() {
+cat <<-EOF
+Secure mysqldump
+
+Usage:
+    smysqldump <ssh> <user> <dbname> <output file>
+
+Options:
+    -dsn, --dsn     parse from format mysql://user:password@host/dbname
+    -u, --user      database user
+    -p, --password  database password
+    -db, --dbname   database name
+    -o, --output    output filename
+    -h, --help      show this message
+EOF
+}
+
+ssh=$1
+shift
+
+args=("$@")
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -dsn | --dsn )
+            shift
+            var=($(sed 's/mysql:\/\/\(.*\):\(.*\)@\(.*\)\/\(.*\)/\1 \2 \3 \4 /g' <<< "$1"))
+
+            user=${var[0]}
+            password=${var[1]}
+            dbname=${var[3]}
+
+            break
+            ;;
+        -u | --user )
+            shift
+
+            if [ -z "$user" ]; then
+                user=$1
+            fi
+            ;;
+        -p | --password )
+            shift
+
+            if [ -z "$password" ]; then
+                password=$1
+            fi
+            ;;
+        -db | --dbname )
+            shift
+
+            if [ -z "$dbname" ]; then
+                dbname=$1
+            fi
+
+            ;;
+        -o | --output )
+            shift
+
+            output=$1
+            ;;
+        -h | --help )
+            usage
+            exit
+            ;;
+        * )
+            ;;
+    esac
+    shift
+done
+
+if [[ -z $user ]] && [[ -z $dbname ]] && [[ -z $output ]]; then
+    user=${args[0]}
+    dbname=${args[1]}
+    output=${args[2]}
+fi
+
+if [ -z "$output" ]; then
+    output="$dbname-$(date +%Y%m%d%H%M%S).sql.gz"
+fi
+
+if [[ "$output" != *.sql.gz ]]; then
+    output="$output.sql.gz"
+fi
+
+if [[ "$output" != *.gz ]]; then
+    output="$output.gz"
+fi
+
+ssh $ssh "mysqldump --no-tablespaces --single-transaction -u$user -p$password $dbname | gzip -9" > $output
+

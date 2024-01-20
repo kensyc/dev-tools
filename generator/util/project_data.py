@@ -1,7 +1,7 @@
 import glob
 import os
 from typing import Generator, Optional
-
+from dotenv import load_dotenv
 import docker
 import yaml
 from docker.models.containers import ContainerCollection
@@ -15,6 +15,7 @@ class ProjectData:
         self.name = name
         self.client = docker.from_env()
         self.containers = self._get_containers()
+        self.compose_yaml = yaml.load(open(self.compose_file, "r"), yaml.Loader)
 
     @property
     def project_name(self):
@@ -60,6 +61,10 @@ class ProjectData:
             self.project_folder + "/**/docker-compose*", recursive=True
         )
 
+        compose_file = compose_file + glob.glob(
+            self.project_folder + "/**/compose*", recursive=True
+        )
+
         gitignores = glob.glob(
             self.project_folder + "/**/.gitignore", recursive=True
         )
@@ -84,7 +89,7 @@ class ProjectData:
 
         match len(compose_file):
             case 0:
-                print("No docker-compose.yml file found in project")
+                print("No (docker-)compose.yaml file found in project")
                 exit(1)
             case 1:
                 compose_file = compose_file[0]
@@ -96,7 +101,8 @@ class ProjectData:
                 print("")
                 compose_file = compose_file[int(input("Selection: "))]
 
-        return compose_file
+        env_file = os.path.dirname(compose_file) + "/.env"
+        # if os.path.exists(env_file):
+        #     load_dotenv(dotenv_path=env_file)
 
-    def get_compose_services(self) -> dict:
-        return yaml.load(open(self.compose_file, "r"), yaml.Loader)
+        return compose_file

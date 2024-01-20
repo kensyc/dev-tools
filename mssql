@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 
-echo "todo"
-exit 1
+source wrapper
+
+function main() {
+    exec_service $MSSQL_SERVICE /opt/mssql-tools/bin/sqlcmd -H mssql -U SA -P $MSSQL_SA_PASSWORD "$@"
+}
+
+wrapper main "$@"

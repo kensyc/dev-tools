@@ -68,12 +68,7 @@ class ServiceFinder:
     ) -> Optional[str]:
         for psub in self.query:
             for service_name, service in compose_yaml["services"].items():
-                if psub in service_name:
-                    return service_name
-
-        for psub in self.query:
-            for service_name, service in compose_yaml["services"].items():
-                if psub in service.get("image", ""):
+                if psub in service_name or psub in service.get("image", ""):
                     return service_name
 
         return None
