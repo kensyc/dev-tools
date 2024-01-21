@@ -67,12 +67,48 @@ if [[ -z $folder ]]; then
     folder=$root_dir/$name
 fi
 
+composefiles=($(fd "docker-compose.ya?ml|compose.ya?ml" $folder))
+
+function valid_compose_file_input {
+    count=$(($1-1))
+    if ! [[ $2 =~ ^[0-9]+$ ]] || [[ $2 -gt $count ]]; then
+        echo "Only an number between 0-$count is allowed, try again"
+        return 1
+    fi
+
+    return 0
+}
+
+if [[ ${#composefiles[@]} -eq 1 ]]; then
+    composefile=${composefiles[0]}
+else
+    index=0
+    echo "Please select which compose file to use:"
+    for composefile in "${composefiles[@]}"; do
+        echo "$index: $composefile"
+        ((++index))
+    done
+
+    read -r composefile_index
+    while ! valid_compose_file_input "${#composefiles[@]}" "$composefile_index"; do
+        read -r composefile_index
+    done
+
+    composefile=${composefiles[composefile_index]}
+fi
+
+if [ -e "$(dirname $composefile)/.env" ]; then
+    set -o allexport
+    source "$(dirname $composefile)/.env"
+    set +o allexport
+fi
+
 if [[ -n $defaults ]]; then
     source $defaults $folder
 fi
 
 if [[ ! -e $cache_dir/$name || $regenerate -eq 1 ]]; then
-    $dev_tools_dir/generator/generate.py $folder $name
+    $dev_tools_dir/generator/generate.py $folder $name $composefile
 fi
 
 [[ $verbose -eq 1 ]] && env=" -e DEV_TOOLS_VERBOSE=1" || env=" -e DEV_TOOLS_VERBOSE=0"

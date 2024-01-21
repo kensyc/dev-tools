@@ -16,7 +16,7 @@ def add_to_output(key: str, value: str):
     output += f"{key}={value}\n"
 
 
-project_data = ProjectData(sys.argv[1], sys.argv[2])
+project_data = ProjectData(sys.argv[1], sys.argv[2], sys.argv[3])
 cachedir = os.getenv(
     "DEV_TOOLS_CACHE_DIR", os.path.expanduser("~/.cache/dev-tools/")
 )
