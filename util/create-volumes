@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 
-if [ ! -d $HOME/.local/share/composer ]; then
-    mkdir -p $HOME/.local/share/composer
+if [ ! -d $HOME/.config/composer ]; then
+    mkdir -p $HOME/.config/composer
 fi
 
- docker volume create --driver local \
+docker volume create --driver local \
     --opt type=none \
-    --opt device=$HOME/.local/share/composer \
+    --opt device=$HOME/.config/composer \
     --opt o=bind \
-    composer-auth
+    composer-home
 
 if [ ! -d $HOME/.cache/composer ]; then
     mkdir -p $HOME/.cache/composer
 fi
 
- docker volume create --driver local \
+docker volume create --driver local \
     --opt type=none \
     --opt device=$HOME/.cache/composer \
     --opt o=bind \
@@ -24,7 +24,7 @@ if [ ! -d $HOME/.cache/npm ]; then
     mkdir -p $HOME/.cache/npm
 fi
 
- docker volume create --driver local \
+docker volume create --driver local \
     --opt type=none \
     --opt device=$HOME/.cache/npm \
     --opt o=bind \
@@ -34,7 +34,7 @@ if [ ! -d $HOME/.cache/yarn ]; then
     mkdir -p $HOME/.cache/yarn
 fi
 
- docker volume create --driver local \
+docker volume create --driver local \
     --opt type=none \
     --opt device=$HOME/.cache/yarn \
     --opt o=bind \
@@ -44,7 +44,7 @@ if [ ! -d $HOME/.config/yarn ]; then
     mkdir -p $HOME/.config/yarn
 fi
 
- docker volume create --driver local \
+docker volume create --driver local \
     --opt type=none \
     --opt device=$HOME/.config/yarn \
     --opt o=bind \
