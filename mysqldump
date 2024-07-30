@@ -5,7 +5,7 @@ source mysqlwrapper
 function main() {
     main_parent
 
-    output=$(exec_service $MYSQL_SERVICE mysqldump $(credentials) "$@")
+    output=$(exec_service $MYSQL_SERVICE mysqldump $(credentials) --single-transaction "$@")
 
     if [[ $? -ne 0 ]]; then
         echo "$output" 1>&2
