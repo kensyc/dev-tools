@@ -1,27 +1,38 @@
 #!/usr/bin/env bash
 
+if [[ -z $COMPOSE_FILE ]]; then
+    /usr/bin/php "$@"
+    exit $!
+fi
+
+if [[ -z $PHP_SERVICE ]]; then
+    php_service='php'
+else
+    php_service=$PHP_SERVICE
+fi
+
 source wrapper
 
 function main() {
-    if [[ -z $PHP_SERVICE ]]; then
-        echo "Could not find PHP service."
-
-        exit 1
-    fi
-
-    # When having permission issues, especially when using older services,
-    # try these environment variables
-    # -e C_UID=1000
-    # -e G_UID=1000
     run_service \
-        -v composer-auth:/var/www/.composer:ro \
-        -v composer-cache:/var/www/.cache/composer \
-        -v ssh-config:/var/www/.ssh:ro \
+        -v composer-home:${DEV_TOOLS_COMPOSER_HOME:-/root/.composer}:ro \
+        -v composer-cache:${DEV_TOOLS_COMPOSER_CACHE:-/root/.cache/composer} \
+        -v ssh-config:${DEV_TOOLS_SSH_CONFIG:-/root/.ssh}:ro \
         -e COMPOSER_MEMORY_LIMIT=-1 \
-        $PHP_SERVICE \
+        "$php_service" \
         composer \
         "$@"
-        # -u "$(id -u):$(id -g)" \
+}
+
+function trap_hooks() {
+    script=$(cat "$(which "${*}")")
+
+    exec_service "$php_service" sh -c "$script"
+
+    # time run_service \
+    #     -v "$(which "${*}")":/hook.sh \
+    #     "$php_service" \
+    #     /hook.sh &> null
 }
 
 wrapper main "$@"

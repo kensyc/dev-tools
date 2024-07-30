@@ -13,7 +13,6 @@ function error() {
 function docker_compose() {
     docker compose \
         -f "$COMPOSE_FILE" \
-        -p "$COMPOSE_PROJECT_NAME" \
         "$@"
 }
 
@@ -80,6 +79,19 @@ function exec_service() {
 }
 
 function traps() {
+    # if command -v trap_hooks &> /dev/null; then
+    #     trap_hooks "$@"
+    # fi
+    #
+    if [[ -n ${DEV_TOOLS_TRAP_HOOKS} ]]; then
+        IFS=';' read -ra hooks <<< "$DEV_TOOLS_TRAP_HOOKS"
+        for hook in "${hooks[@]}"; do
+            if [[ "$*" =~ $hook ]]; then
+                trap_hooks "$hook.sh"
+            fi
+        done
+    fi
+
     for ((i = 0; i < ${#traps[@]}; i++)); do
         if [[ ${DEV_TOOLS_VERBOSE} -eq 1 ]]; then
             ${traps[$i]} 3>&2
@@ -99,7 +111,7 @@ function wrapper() {
     exec 3<> /tmp/dockerenv
 
     # cleanup
-    trap traps EXIT
+    trap 'traps $(basename "$0") ${@}' EXIT
 
     if [[ ${DEV_TOOLS_VERBOSE} -eq 1 ]]; then
         # use stderr to show logs

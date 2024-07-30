@@ -16,19 +16,8 @@ source wrapper
 function main() {
     exec_service \
         "$php_service" \
-        php \
+        vendor/bin/phpunit \
         "$@"
-}
-
-function trap_hooks() {
-    script=$(cat "$(which "${*}")")
-
-    exec_service "$php_service" sh -c "$script"
-
-    # time run_service \
-    #     -v "$(which "${*}")":/hook.sh \
-    #     "$php_service" \
-    #     /hook.sh &> null
 }
 
 wrapper main "$@"
