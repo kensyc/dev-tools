@@ -3,26 +3,22 @@
 set -e
 
 if [[ -z $1 ]]; then
-    echo "Usage: skibana user@hostname"
+    echo "Usage: ssh-kibana user@hostname"
 fi
 
 port=9200
-while [[ -n $(ss -tupln | grep :$port) && $port < 65535 ]]; do
+while [[ -n $(ss -tupln | grep :$port) && $port -lt 65535 ]]; do
     ((port++))
 done
 
-ssh -4 -o ExitOnForwardFailure=yes -f -L $port:localhost:9200 $1 sleep 30
+ssh -4 -o ExitOnForwardFailure=yes -f -L "$port":localhost:9200 "$1" sleep 30
 
 version=$(curl -s \
     -XGET "localhost:$port?filter_path=version.number&pretty=false" | \
     awk -F'"' {'print $6'})
 
-echo $version
-
-exit 0
-
 docker run --rm -it \
     --net host \
-    -e ELASTICSEARCH_HOSTS=http://localhost:$port \
+    -e ELASTICSEARCH_HOSTS=http://localhost:"$port" \
     -p 5601:5601 \
-    docker.elastic.co/kibana/kibana:$version
+    docker.elastic.co/kibana/kibana:"$version"
